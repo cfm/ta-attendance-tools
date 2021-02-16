@@ -1,13 +1,14 @@
-// Docs on event and context https://www.netlify.com/docs/functions/#the-handler-method
 const handler = async (event) => {
+  if (event.httpMethod !== "POST") {
+    return { statusCode: 405, body: "Method Not Allowed" };
+  }
+
   try {
-    const subject = event.queryStringParameters.name || 'World'
+    const params = JSON.parse(event.body);
+    const transcript = params.transcript;
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: `Hello ${subject}` }),
-      // // more keys you can return:
-      // headers: { "headerName": "headerValue", ... },
-      // isBase64Encoded: true,
+      body: JSON.stringify({transcript: transcript}),
     }
   } catch (error) {
     return { statusCode: 500, body: error.toString() }
