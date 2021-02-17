@@ -1,12 +1,5 @@
 <template>
   <v-app>
-    <v-app-bar
-      app
-      color="primary"
-      dark
-    >
-    </v-app-bar>
-
     <v-main>
       <ReformatProxyTranscript />
     </v-main>
@@ -14,10 +7,10 @@
 </template>
 
 <script>
-import ReformatProxyTranscript from './components/ReformatProxyTranscript';
+import ReformatProxyTranscript from "./components/ReformatProxyTranscript";
 
 export default {
-  name: 'App',
+  name: "App",
 
   components: {
     ReformatProxyTranscript,
