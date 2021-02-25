@@ -1,19 +1,19 @@
 <template>
   <v-app>
     <v-main>
-      <ReformatProxyTranscript />
+      <Wizard />
     </v-main>
   </v-app>
 </template>
 
 <script>
-import ReformatProxyTranscript from "./components/ReformatProxyTranscript";
+import Wizard from "./components/Wizard";
 
 export default {
   name: "App",
 
   components: {
-    ReformatProxyTranscript,
+    Wizard,
   },
 
   data: () => ({
