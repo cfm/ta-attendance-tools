@@ -1,9 +1,5 @@
 <template>
   <v-container>
-    <v-chip :ripple="false">
-      <v-avatar>{{ memberList.length }}</v-avatar>
-      members
-    </v-chip>
     <v-form>
       <v-file-input
         accept="text/csv"
@@ -19,6 +15,7 @@
 
 <script>
 import Papa from "papaparse";
+import { mapMutations } from "vuex";
 
 // Adapted from <https://github.com/mholt/PapaParse/issues/752#issuecomment-567294386>
 const papaPromise = (file) =>
@@ -60,23 +57,24 @@ export default {
     };
   },
 
-  computed: {
-    memberList() {
-      if (this.fileData.data == undefined) return [];
-
-      return this.fileData.data.map((row) => {
-        return Object.fromEntries(
-          row.map((val, idx) => {
-            return [columns[idx], val];
-          })
-        );
-      });
-    },
+  methods: {
+    ...mapMutations(["replaceMemberList"]),
   },
 
   watch: {
     file: async function () {
       this.fileData = await papaPromise(this.file);
+
+      if (this.fileData.data == undefined) return [];
+      this.replaceMemberList(
+        this.fileData.data.map((row) => {
+          return Object.fromEntries(
+            row.map((val, idx) => {
+              return [columns[idx], val];
+            })
+          );
+        })
+      );
     },
   },
 };

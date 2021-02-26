@@ -18,6 +18,8 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
+
 import ImportMemberList from "./ImportMemberList";
 
 export default {
@@ -27,11 +29,15 @@ export default {
     ImportMemberList,
   },
 
-  data: () => {
-    return {
-      haveAttendance: false,
-      haveMemberList: false,
-    };
+  computed: {
+    ...mapState({
+      members: (state) => state.memberList,
+    }),
+
+    haveAttendance: () => false,
+    haveMemberList() {
+      return this.members.length > 0;
+    },
   },
 };
 </script>
