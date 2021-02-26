@@ -8,11 +8,15 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     memberList: [],
+    presentList: [],
   },
   mutations: {
     replaceMemberList(state, memberList) {
       state.memberList = memberList;
-    }
+    },
+    replacePresentList(state, presentList) {
+      state.presentList = presentList;
+    },
   },
   modules: {
   },

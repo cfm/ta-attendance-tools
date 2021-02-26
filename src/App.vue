@@ -5,6 +5,9 @@
         <v-chip :ripple="false">
           <v-avatar>{{ members.length }}</v-avatar> members
         </v-chip>
+        <v-chip :ripple="false">
+          <v-avatar>{{ present.length }}</v-avatar> present
+        </v-chip>
       </v-app-bar>
       <Wizard />
     </v-main>
@@ -26,6 +29,7 @@ export default {
   computed: {
     ...mapState({
       members: (state) => state.memberList,
+      present: (state) => state.presentList,
     }),
   },
 };
