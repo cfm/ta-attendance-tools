@@ -13,6 +13,9 @@
       <v-stepper-content step="1">
         <ImportMemberList />
       </v-stepper-content>
+      <v-stepper-content step="2">
+        <TakeAttendance />
+      </v-stepper-content>
     </v-stepper-items>
   </v-stepper>
 </template>
@@ -21,20 +24,25 @@
 import { mapState } from "vuex";
 
 import ImportMemberList from "./ImportMemberList";
+import TakeAttendance from "./TakeAttendance";
 
 export default {
   name: "Wizard",
 
   components: {
     ImportMemberList,
+    TakeAttendance,
   },
 
   computed: {
     ...mapState({
       members: (state) => state.memberList,
+      present: (state) => state.presentList,
     }),
 
-    haveAttendance: () => false,
+    haveAttendance() {
+      return this.present.length > 0;
+    },
     haveMemberList() {
       return this.members.length > 0;
     },
