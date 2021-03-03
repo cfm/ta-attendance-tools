@@ -16,6 +16,9 @@
       <v-stepper-content step="2">
         <TakeAttendance />
       </v-stepper-content>
+      <v-stepper-content step="3">
+        <AssignProxies />
+      </v-stepper-content>
     </v-stepper-items>
   </v-stepper>
 </template>
@@ -23,6 +26,7 @@
 <script>
 import { mapState } from "vuex";
 
+import AssignProxies from "./AssignProxies";
 import ImportMemberList from "./ImportMemberList";
 import TakeAttendance from "./TakeAttendance";
 
@@ -30,6 +34,7 @@ export default {
   name: "Wizard",
 
   components: {
+    AssignProxies,
     ImportMemberList,
     TakeAttendance,
   },
