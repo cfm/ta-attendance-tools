@@ -18,4 +18,5 @@ module.exports = {
     PROXY_KEYS: proxyKeys,
 
     MAX_PROXIES: maxProxies,
+    MAX_PROXY_ASSIGNMENTS: 2,
 };

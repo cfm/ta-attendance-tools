@@ -1,6 +1,23 @@
 const Graph = require('graph-data-structure');
+const _ = require('lodash');
 
-const { MAX_PROXIES, PROXY_KEYS } = require('../../src/constants');
+const { MAX_PROXIES, MAX_PROXY_ASSIGNMENTS, PROXY_KEYS } = require('../../src/constants');
+
+
+const ProxyGraph = function () {
+  const g = new Graph();
+
+  g.targets = () => g.nodes().filter(node => g.indegree(node) == 0);
+  g.target_candidates = () => _.fromPairs(g.targets().map(target => {
+    return [target, g.adjacent(target)];
+  }));
+
+  g.overassigned = () => g.nodes().filter(node => g.indegree(node) > MAX_PROXY_ASSIGNMENTS);
+  g.unrepresented = () => g.nodes().filter(node => g.outdegree(node) == 0);
+
+  return g;
+}
+
 
 const memberListToMap = (memberList, presentList) => {
   const map = new Map();
@@ -14,8 +31,8 @@ const memberListToMap = (memberList, presentList) => {
   return map;
 };
 
-const deriveAbsentGraph = (members) => {
-  const g = new Graph();
+const graphProxySpace = (members) => {
+  const g = new ProxyGraph();
   const unresolvable = [];
 
   // Add ALL members as nodes.
@@ -57,7 +74,7 @@ const deriveAbsentGraph = (members) => {
       g.outdegree(member.lastName),
     ];
     if (Math.max(...degrees) == 0) {
-      console.debug(`Pruning irrelevant member=${member.lastName} from proxy solution`);
+      console.debug(`Pruning irrelevant member=${member.lastName} from proxy space`);
       g.removeNode(member.lastName);
     }
   });
@@ -84,13 +101,14 @@ const handler = async (event) => {
     console.debug(`Received presentList of size=${presentList.length}`);
 
     const members = memberListToMap(memberList, presentList);
-    const { graph, unresolvable } = deriveAbsentGraph(members);
+    const proxySpace = graphProxySpace(members);
+    console.info(`Need to solve proxies for targets=${JSON.stringify(proxySpace.graph.target_candidates())}`)
 
     return {
       statusCode: 200,
       body: JSON.stringify({
-        graph: graph.serialize(),
-        unresolvable,
+        graph: proxySpace.graph.serialize(),
+        unresolvable: proxySpace.unresolvable,
       }),
     }
   }
