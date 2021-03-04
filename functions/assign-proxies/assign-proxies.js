@@ -1,18 +1,6 @@
 const { DirectedGraph } = require('@datastructures-js/graph');
 
-// FIXME: constant
-proxyKeys = [
-  "proxy1",
-  "proxy2",
-  "proxy3",
-  "proxy4",
-  "proxy5",
-  "proxy6",
-  "proxy7",
-  "proxy8",
-  "proxy9",
-  "proxy10",
-]
+const { PROXY_KEYS } = require('../../src/constants');
 
 const convertAttendanceToGraph = (memberList, presentList) => {
   const g = new DirectedGraph();
@@ -28,7 +16,7 @@ const convertAttendanceToGraph = (memberList, presentList) => {
 
   // Add PRESENT proxies as edges
   g._vertices.forEach(member => {
-    proxyKeys.forEach(k => {
+    PROXY_KEYS.forEach(k => {
       const proxyKey = member.value[k];
       if (proxyKey == "") return;
 

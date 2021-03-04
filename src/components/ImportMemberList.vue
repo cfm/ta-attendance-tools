@@ -17,6 +17,8 @@
 import Papa from "papaparse";
 import { mapMutations } from "vuex";
 
+import { KEYS } from "@/constants";
+
 // Adapted from <https://github.com/mholt/PapaParse/issues/752#issuecomment-567294386>
 const papaPromise = (file) =>
   new Promise((resolve, reject) => {
@@ -29,23 +31,6 @@ const papaPromise = (file) =>
       },
     });
   });
-
-const columns = [
-  "lastName",
-  "firstName",
-  "padding",
-  "lastModified",
-  "proxy1",
-  "proxy2",
-  "proxy3",
-  "proxy4",
-  "proxy5",
-  "proxy6",
-  "proxy7",
-  "proxy8",
-  "proxy9",
-  "proxy10",
-];
 
 export default {
   name: "ImportMemberList",
@@ -70,7 +55,7 @@ export default {
         this.fileData.data.map((row) => {
           return Object.fromEntries(
             row.map((val, idx) => {
-              return [columns[idx], val];
+              return [KEYS[idx], val];
             })
           );
         })
