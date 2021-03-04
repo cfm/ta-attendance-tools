@@ -1,40 +1,51 @@
-const { DirectedGraph } = require('@datastructures-js/graph');
+const Graph = require('graph-data-structure');
 
 const { PROXY_KEYS } = require('../../src/constants');
 
-const convertAttendanceToGraph = (memberList, presentList) => {
-  const g = new DirectedGraph();
-  var unresolvable = [];
-
-  // Add ALL members as vertices
+const memberListToMap = (memberList, presentList) => {
+  const map = new Map();
   memberList.forEach(member => {
-    g.addVertex(member.lastName, {
+    map.set(member.lastName, {
       ...member,
       present: presentList.includes(member.lastName),
     });
   });
 
-  // Add PRESENT proxies as edges
-  g._vertices.forEach(member => {
+  return map;
+};
+
+const deriveAbsentGraph = (members) => {
+  const g = new Graph();
+  const unresolvable = [];
+
+  // Add ALL members as nodes.
+  members.forEach(member => {
+    g.addNode(member.lastName);
+  });
+
+  // Add PRESENT proxies for ABSENT members as edges.
+  members.forEach(member => {
+    if (member.present) return;
+
     PROXY_KEYS.forEach(k => {
-      const proxyKey = member.value[k];
+      const proxyKey = member[k];
       if (proxyKey == "") return;
 
-      const proxy = g._vertices.get(proxyKey);
+      const proxy = members.get(proxyKey);
       if (!proxy) {
-        console.error(`Skipped unresolvable proxy=${proxyKey} for member=${member.key}`);
-        unresolvable.push({ member: member.key, proxy: proxyKey });
+        console.error(`Skipping unresolvable proxy=${proxyKey} for member=${member.lastName}`);
+        unresolvable.push({ member: member.lastName, proxy: proxyKey });
         return;
       }
-      if (!proxy.value.present) {
-        console.debug(`Skipped absent proxy=${proxy.key} for member=${member.key}`);
+      if (!proxy.present) {
+        console.debug(`Skipping absent proxy=${proxy.lastName} for member=${member.lastName}`);
         return;
       }
 
       const idx = k.replace('proxy', '');
       const weight = 1 / idx;
-      g.addEdge(member.key, proxy.key, weight);
-      console.debug(`Added proxy=${proxy.key} for member=${member.key} with weight=${weight}`);
+      console.debug(`Adding proxy=${proxy.lastName} for member=${member.lastName} with weight=${weight}`);
+      g.addEdge(member.lastName, proxy.lastName, weight);
     });
   })
 
@@ -59,11 +70,13 @@ const handler = async (event) => {
     console.debug(`Received memberList of size=${memberList.length}`);
     console.debug(`Received presentList of size=${presentList.length}`);
 
-    const { graph, unresolvable } = convertAttendanceToGraph(memberList, presentList);
+    const members = memberListToMap(memberList, presentList);
+    const { graph, unresolvable } = deriveAbsentGraph(members);
 
     return {
       statusCode: 200,
       body: JSON.stringify({
+        graph: graph.serialize(),
         unresolvable,
       }),
     }
