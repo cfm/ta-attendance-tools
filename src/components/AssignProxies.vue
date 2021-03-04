@@ -12,12 +12,15 @@
       </li>
     </ul>
     <v-btn @click="doAssignProxies">Assign Proxies</v-btn>
-    <v-sheet>{{ output }}</v-sheet>
+
+    <d3-network :net-nodes="nodes" :net-links="links" :options="options" />
   </v-container>
 </template>
 
 <script>
 import { mapState } from "vuex";
+
+import D3Network from "vue-d3-network";
 
 const _ = require("lodash");
 
@@ -27,7 +30,16 @@ export default {
   data: () => ({
     transcript: "",
     output: "",
+
+    options: {
+      linkLabels: true,
+      nodeLabels: true,
+    },
   }),
+
+  components: {
+    D3Network,
+  },
 
   computed: {
     ...mapState({
@@ -56,6 +68,23 @@ export default {
       // per <https://github.com/lodash/lodash/issues/1459#issuecomment-253969771>
       return _(this._proxies).toPairs().sortBy(0).fromPairs().value();
     },
+    links: function () {
+      if (this.output.graph) {
+        return this.output.graph.links.map((link) => {
+          return {
+            ...link,
+            sid: link.source,
+            tid: link.target,
+            name: link.weight,
+          };
+        });
+      }
+      return [];
+    },
+    nodes: function () {
+      if (this.output.graph) return this.output.graph.nodes;
+      return [];
+    },
   },
 
   methods: {
@@ -72,3 +101,5 @@ export default {
   },
 };
 </script>
+
+  <style src="vue-d3-network/dist/vue-d3-network.css"></style>
