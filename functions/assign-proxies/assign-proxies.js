@@ -1,6 +1,6 @@
 const Graph = require('graph-data-structure');
 
-const { PROXY_KEYS } = require('../../src/constants');
+const { MAX_PROXIES, PROXY_KEYS } = require('../../src/constants');
 
 const memberListToMap = (memberList, presentList) => {
   const map = new Map();
@@ -43,7 +43,7 @@ const deriveAbsentGraph = (members) => {
       }
 
       const idx = k.replace('proxy', '');
-      const weight = 1 / idx;
+      const weight = MAX_PROXIES - idx + 1;
       console.debug(`Adding proxy=${proxy.lastName} for member=${member.lastName} with weight=${weight}`);
       g.addEdge(member.lastName, proxy.lastName, weight);
     });

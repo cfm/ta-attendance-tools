@@ -1,15 +1,9 @@
-const proxyKeys = [
-    "proxy1",
-    "proxy2",
-    "proxy3",
-    "proxy4",
-    "proxy5",
-    "proxy6",
-    "proxy7",
-    "proxy8",
-    "proxy9",
-    "proxy10",
-];
+const maxProxies = 10;
+const proxyKeys = [];
+for (let i = 1; i <= maxProxies; i++) {
+    const proxyKey = `proxy${i}`;
+    proxyKeys.push(proxyKey);
+}
 
 const keys = [
     "lastName",
@@ -22,4 +16,6 @@ const keys = [
 module.exports = {
     KEYS: keys,
     PROXY_KEYS: proxyKeys,
+
+    MAX_PROXIES: maxProxies,
 };
