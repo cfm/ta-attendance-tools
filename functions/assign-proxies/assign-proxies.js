@@ -49,6 +49,19 @@ const deriveAbsentGraph = (members) => {
     });
   })
 
+  // Prune members we don't need to solve for, because they are both
+  // (a) present and (b) not connected to any absent members.
+  members.forEach(member => {
+    const degrees = [
+      g.indegree(member.lastName),
+      g.outdegree(member.lastName),
+    ];
+    if (Math.max(...degrees) == 0) {
+      console.debug(`Pruning irrelevant member=${member.lastName} from proxy solution`);
+      g.removeNode(member.lastName);
+    }
+  });
+
   return {
     graph: g,
     unresolvable: unresolvable,
