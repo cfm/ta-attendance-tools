@@ -37,7 +37,7 @@ const memberListToMap = (memberList, presentList) => {
 
 const resetProxySpace = (members) => {
   const g = new ProxyGraph();
-  const unresolvable = [];
+  g.unresolvable = [];
 
   // Add ALL members as nodes.
   members.forEach(member => {
@@ -55,7 +55,7 @@ const resetProxySpace = (members) => {
       const proxy = members.get(proxyKey);
       if (!proxy) {
         console.error(`Skipping unresolvable proxy=${proxyKey} for member=${member.lastName}`);
-        unresolvable.push({ member: member.lastName, proxy: proxyKey });
+        g.unresolvable.push({ member: member.lastName, proxy: proxyKey });
         return;
       }
       if (!proxy.present) {
@@ -84,10 +84,7 @@ const resetProxySpace = (members) => {
   });
 
   g.resetCandidates();
-  return {
-    graph: g,
-    unresolvable: unresolvable,
-  }
+  return g;
 };
 
 const handler = async (event) => {
@@ -105,12 +102,12 @@ const handler = async (event) => {
 
     const members = memberListToMap(memberList, presentList);
     const proxySpace = resetProxySpace(members);
-    console.info(`Need to solve proxies for targets=${JSON.stringify(proxySpace.graph.candidates)}`)
+    console.info(`Need to solve proxies for targets=${JSON.stringify(proxySpace.candidates)}`)
 
     return {
       statusCode: 200,
       body: JSON.stringify({
-        graph: proxySpace.graph.serialize(),
+        graph: proxySpace.serialize(),
         unresolvable: proxySpace.unresolvable,
       }),
     }
