@@ -7,13 +7,17 @@ const { MAX_PROXIES, MAX_PROXY_ASSIGNMENTS, PROXY_KEYS } = require('../../src/co
 const ProxyGraph = function () {
   const g = new Graph();
 
+  g.proxiesOverassigned = () => g.nodes().filter(node => g.indegree(node) > MAX_PROXY_ASSIGNMENTS);
   g.targets = () => g.nodes().filter(node => g.indegree(node) == 0);
-  g.target_candidates = () => _.fromPairs(g.targets().map(target => {
-    return [target, g.adjacent(target)];
-  }));
+  g.targetsUnrepresented = () => g.nodes().filter(node => g.outdegree(node) == 0);
 
-  g.overassigned = () => g.nodes().filter(node => g.indegree(node) > MAX_PROXY_ASSIGNMENTS);
-  g.unrepresented = () => g.nodes().filter(node => g.outdegree(node) == 0);
+  g.resetCandidates = function () {
+    g.candidates = _.fromPairs(g.targets().map(target => {
+      return [target, {
+        [g.adjacent(target)]: false,
+      }];
+    }));
+  };
 
   return g;
 }
@@ -31,7 +35,7 @@ const memberListToMap = (memberList, presentList) => {
   return map;
 };
 
-const graphProxySpace = (members) => {
+const resetProxySpace = (members) => {
   const g = new ProxyGraph();
   const unresolvable = [];
 
@@ -79,13 +83,12 @@ const graphProxySpace = (members) => {
     }
   });
 
+  g.resetCandidates();
   return {
     graph: g,
     unresolvable: unresolvable,
   }
 };
-
-
 
 const handler = async (event) => {
   if (event.httpMethod !== "POST") {
@@ -101,8 +104,8 @@ const handler = async (event) => {
     console.debug(`Received presentList of size=${presentList.length}`);
 
     const members = memberListToMap(memberList, presentList);
-    const proxySpace = graphProxySpace(members);
-    console.info(`Need to solve proxies for targets=${JSON.stringify(proxySpace.graph.target_candidates())}`)
+    const proxySpace = resetProxySpace(members);
+    console.info(`Need to solve proxies for targets=${JSON.stringify(proxySpace.graph.candidates)}`)
 
     return {
       statusCode: 200,
