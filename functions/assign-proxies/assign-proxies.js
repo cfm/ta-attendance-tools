@@ -1,5 +1,7 @@
+const product = require('cartesian-product');
 const Graph = require('graph-data-structure');
 const _ = require('lodash');
+const { mean } = require('mathjs');
 
 const { MAX_PROXIES, MAX_PROXY_ASSIGNMENTS, PROXY_KEYS } = require('../../src/constants');
 
@@ -7,16 +9,38 @@ const { MAX_PROXIES, MAX_PROXY_ASSIGNMENTS, PROXY_KEYS } = require('../../src/co
 const ProxyGraph = function () {
   const g = new Graph();
 
+  g.candidates = () => g.targets().map(u => g.adjacent(u).map(v => {
+    const w = g.getEdgeWeight(u, v);
+    return { u, v, w };
+  }));
+  g.preference = () => mean.apply(null, g.candidates().flat().map(x => x.w - MAX_PROXIES));
   g.proxiesOverassigned = () => g.nodes().filter(node => g.indegree(node) > MAX_PROXY_ASSIGNMENTS);
-  g.targets = () => g.nodes().filter(node => g.indegree(node) == 0);
-  g.targetsUnrepresented = () => g.nodes().filter(node => g.outdegree(node) == 0);
+  g.score = function () {
+    return {
+      overassigned: g.proxiesOverassigned().length,
+      preference: g.preference(),
+      unrepresented: g.targetsUnrepresented().length,
+    }
+  };
+  g.slates = () => product(g.candidates());
 
-  g.resetCandidates = function () {
-    g.candidates = _.fromPairs(g.targets().map(target => {
-      return [target, {
-        [g.adjacent(target)]: false,
-      }];
-    }));
+  g.targets = () => g.nodes().filter(node => g.indegree(node) == 0);
+  g.targetsUnrepresented = () => g.targets().filter(node => g.outdegree(node) == 0);
+
+  g.solve = function () {
+    let best = null;
+    let best_score = 0;
+
+    for (const slate of g.slates()) {
+      const sg = new ProxyGraph();
+      slate.forEach(x => {
+        const { u, v, w } = x;
+        sg.addEdge(u, v, w);
+      });
+
+      return sg;
+    }
+
   };
 
   return g;
@@ -83,7 +107,6 @@ const resetProxySpace = (members) => {
     }
   });
 
-  g.resetCandidates();
   return g;
 };
 
@@ -102,7 +125,12 @@ const handler = async (event) => {
 
     const members = memberListToMap(memberList, presentList);
     const proxySpace = resetProxySpace(members);
-    console.info(`Need to solve proxies for targets=${JSON.stringify(proxySpace.candidates)}`)
+    console.debug("Need to solve the following proxy space:")
+    console.debug(proxySpace.serialize());
+
+    const solution = proxySpace.solve();
+    console.log(solution.serialize());
+    console.log("^^^ Found solution")
 
     return {
       statusCode: 200,
