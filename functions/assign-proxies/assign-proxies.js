@@ -1,4 +1,4 @@
-const product = require('cartesian-product');
+const product = require('big-cartesian');
 const Graph = require('graph-data-structure');
 const _ = require('lodash');
 const { mean } = require('mathjs');
