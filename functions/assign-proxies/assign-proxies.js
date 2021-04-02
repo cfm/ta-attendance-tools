@@ -5,6 +5,32 @@ const { mean } = require('mathjs');
 
 const { MAX_PROXIES, MAX_PROXY_ASSIGNMENTS, PROXY_KEYS } = require('../../src/constants');
 
+/*
+  If member X lists members A, B, and C as possible their proxies and is
+  ultimately represented by C, then we say that:
+
+  1. X is the target, who is unrepresented;
+  2. A, B, and C are the candidates; and
+  3. C is the proxy once assigned to represent X.
+
+  X, A, B, and C are all nodes.  Links are defined as
+
+  {
+    u: target,
+    v: candidate,
+    w: weight
+  }
+
+  such that the adjacent-node list for target u is  the set of
+  candidates v to represent it.
+
+  Therefore, a node's
+
+    indegree = number of members it could represent; and
+    outdegree = number of candidates that could represent it.
+
+*/
+
 
 const ProxyGraph = function () {
   const g = new Graph();
