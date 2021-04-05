@@ -1,76 +1,8 @@
-const product = require('big-cartesian');
-const Graph = require('graph-data-structure');
 const _ = require('lodash');
-const { mean } = require('mathjs');
 
 const { MAX_PROXIES, MAX_PROXY_ASSIGNMENTS, PROXY_KEYS } = require('../../src/constants');
 
-/*
-  If member X lists members A, B, and C as possible their proxies and is
-  ultimately represented by C, then we say that:
-
-  1. X is the target, who is unrepresented;
-  2. A, B, and C are the candidates; and
-  3. C is the proxy once assigned to represent X.
-
-  X, A, B, and C are all nodes.  Links are defined as
-
-  {
-    u: target,
-    v: candidate,
-    w: weight
-  }
-
-  such that the adjacent-node list for target u is  the set of
-  candidates v to represent it.
-
-  Therefore, a node's
-
-    indegree = number of members it could represent; and
-    outdegree = number of candidates that could represent it.
-
-*/
-
-
-const ProxyGraph = function () {
-  const g = new Graph();
-
-  g.candidates = () => g.targets().map(u => g.adjacent(u).map(v => {
-    const w = g.getEdgeWeight(u, v);
-    return { u, v, w };
-  }));
-  g.preference = () => mean.apply(null, g.candidates().flat().map(x => x.w - MAX_PROXIES));
-  g.proxiesOverassigned = () => g.nodes().filter(node => g.indegree(node) > MAX_PROXY_ASSIGNMENTS);
-  g.score = function () {
-    return {
-      overassigned: g.proxiesOverassigned().length,
-      preference: g.preference(),
-      unrepresented: g.targetsUnrepresented().length,
-    }
-  };
-  g.slates = () => product(g.candidates());
-
-  g.targets = () => g.nodes().filter(node => g.indegree(node) == 0);
-  g.targetsUnrepresented = () => g.targets().filter(node => g.outdegree(node) == 0);
-
-  g.solve = function () {
-    let best = null;
-    let best_score = 0;
-
-    for (const slate of g.slates()) {
-      const sg = new ProxyGraph();
-      slate.forEach(x => {
-        const { u, v, w } = x;
-        sg.addEdge(u, v, w);
-      });
-
-      return sg;
-    }
-
-  };
-
-  return g;
-}
+const ProxyGraph = require('./ProxyGraph');
 
 
 const memberListToMap = (memberList, presentList) => {
