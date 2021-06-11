@@ -1,6 +1,6 @@
 const _ = require('lodash');
 
-const { MAX_PROXIES, MAX_PROXY_ASSIGNMENTS, PROXY_KEYS } = require('../../src/constants');
+const { MAX_PROXIES, PROXY_KEYS } = require('../../src/constants');
 
 const ProxyGraph = require('./ProxyGraph');
 
