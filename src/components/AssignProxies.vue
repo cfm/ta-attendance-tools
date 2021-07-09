@@ -1,8 +1,9 @@
 <template>
   <v-container>
+    <v-btn @click="doAssignProxies">Assign Proxies</v-btn>
     <ul>
       <li
-        v-for="[holder, assignments] in Object.entries(proxies)"
+        v-for="[holder, assignments] in Object.entries(assignments)"
         :key="holder"
       >
         {{ holder }} holds {{ assignments.length }} proxy/ies for:
@@ -11,81 +12,42 @@
         </span>
       </li>
     </ul>
-    <v-btn @click="doAssignProxies">Assign Proxies</v-btn>
-
-    <d3-network :net-nodes="nodes" :net-links="links" :options="options" />
   </v-container>
 </template>
 
 <script>
 import { mapState } from "vuex";
 
-import D3Network from "vue-d3-network";
-
-const _ = require("lodash");
-
 export default {
   name: "AssignProxies",
 
   data: () => ({
     transcript: "",
-    output: "",
-
-    options: {
-      linkLabels: true,
-      nodeLabels: true,
-    },
     proxies: null,
   }),
-
-  components: {
-    D3Network,
-  },
 
   computed: {
     ...mapState({
       memberList: (state) => state.memberList,
       presentList: (state) => state.presentList,
     }),
-    _proxies: function () {
-      const lines = this.transcript.split("\n");
-      let proxies = {};
-      lines.forEach((line) => {
-        if (line.includes("proxy")) {
-          let [represented, holder] = line.split("proxy");
+    assignments: function () {
+      let assignments = {};
+      if (!this.proxies) return assignments;
+
+      Object.entries(this.proxies).forEach(([represented, holder]) => {
           represented = represented.trim();
           holder = holder.trim();
 
-          if (proxies[holder]) {
-            proxies[holder].push(represented);
+          if (assignments[holder]) {
+            assignments[holder].push(represented);
           } else {
-            proxies[holder] = [represented];
+            assignments[holder] = [represented];
           }
-        }
       });
-      return proxies;
-    },
-    proxies: function () {
-      // per <https://github.com/lodash/lodash/issues/1459#issuecomment-253969771>
-      return _(this._proxies).toPairs().sortBy(0).fromPairs().value();
-    },
-    links: function () {
-      if (this.output.graph) {
-        return this.output.graph.links.map((link) => {
-          return {
-            ...link,
-            sid: link.source,
-            tid: link.target,
-            name: link.weight,
-          };
-        });
-      }
-      return [];
-    },
-    nodes: function () {
-      if (this.output.graph) return this.output.graph.nodes;
-      return [];
-    },
+
+      return assignments;
+    }
   },
 
   methods: {
