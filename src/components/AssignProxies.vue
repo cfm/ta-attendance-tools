@@ -35,6 +35,7 @@ export default {
       linkLabels: true,
       nodeLabels: true,
     },
+    proxies: null,
   }),
 
   components: {
@@ -89,14 +90,17 @@ export default {
 
   methods: {
     async doAssignProxies() {
-      let res = await fetch("/.netlify/functions/assign-proxies", {
+      let res = await fetch(process.env.VUE_APP_PROXY_SOLVER_API, {
         method: "POST",
+          headers: {
+            'Content-Type': 'application/json',
+            },
         body: JSON.stringify({
           memberList: this.memberList,
           presentList: this.presentList,
         }),
       });
-      this.output = await res.json();
+      this.proxies = await res.json();
     },
   },
 };
