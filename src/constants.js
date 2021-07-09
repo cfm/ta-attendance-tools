@@ -16,7 +16,4 @@ const keys = [
 module.exports = {
     KEYS: keys,
     PROXY_KEYS: proxyKeys,
-
-    MAX_PROXIES: maxProxies,
-    MAX_PROXY_ASSIGNMENTS: 2,
 };
