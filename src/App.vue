@@ -6,6 +6,9 @@
       <v-snackbar v-model="showConnectedToSalesforce" color="success">
         Connected to Salesforce
       </v-snackbar>
+      <v-snackbar v-model="showSyncError" color="error">
+        {{ lastSyncError }}
+      </v-snackbar>
       <v-app-bar>
         <v-chip @click="sync()">
           <v-avatar><v-icon>mdi-table-refresh</v-icon></v-avatar>
@@ -48,9 +51,11 @@ export default {
     return {
       conn: null,
       lastSync: null,
+      lastSyncError: false,
       syncInProgress: false,
 
       showConnectedToSalesforce: false,
+      showSyncError: false,
     };
   },
 
@@ -68,6 +73,9 @@ export default {
   watch: {
     conn: function (conn) {
       if (conn) this.showConnectedToSalesforce = true;
+    },
+    lastSyncError: function () {
+      this.showSyncError = true;
     },
   },
 
@@ -92,7 +100,7 @@ export default {
         (err, res) => {
           this.syncInProgress = false;
           if (err) {
-            console.log(err); // TODO: alert()
+            this.lastSyncError = err;
             return;
           }
           this.lastSync = Date.now();
