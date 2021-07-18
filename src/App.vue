@@ -34,6 +34,7 @@
 import jsforce from 'jsforce';
 import { mapMutations, mapState } from 'vuex';
 
+import { FIELDS } from '@/constants';
 import Loading from './components/Loading';
 import Login from './components/Login';
 import Wizard from './components/Wizard';
@@ -96,7 +97,9 @@ export default {
     sync() {
       this.syncInProgress = true;
       this.conn.query(
-        'Select Id, Name FROM Contact WHERE Is_Current_TA_Member__c = true',
+        `SELECT ${FIELDS.join(
+          ', ',
+        )} FROM Contact WHERE Is_Current_TA_Member__c = true`,
         (err, res) => {
           this.syncInProgress = false;
           if (err) {
