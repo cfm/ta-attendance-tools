@@ -2,10 +2,19 @@
   <v-app>
     <v-main>
       <Login v-if="loginRequired" />
+      <Loading v-if="syncInProgress" />
       <v-snackbar v-model="showConnectedToSalesforce" color="success">
         Connected to Salesforce
       </v-snackbar>
       <v-app-bar>
+        <v-chip @click="sync()">
+          <v-avatar><v-icon>mdi-table-refresh</v-icon></v-avatar>
+          <template v-if="lastSync">
+            Roster updated&nbsp;
+            <timeago :datetime="lastSync" />
+          </template>
+          <template v-else> Refresh </template>
+        </v-chip>
         <v-chip :ripple="false">
           <v-avatar>{{ members.length }}</v-avatar> members
         </v-chip>
@@ -20,8 +29,9 @@
 
 <script>
 import jsforce from 'jsforce';
-import { mapState } from 'vuex';
+import { mapMutations, mapState } from 'vuex';
 
+import Loading from './components/Loading';
 import Login from './components/Login';
 import Wizard from './components/Wizard';
 
@@ -29,6 +39,7 @@ export default {
   name: 'App',
 
   components: {
+    Loading,
     Login,
     Wizard,
   },
@@ -36,6 +47,8 @@ export default {
   data() {
     return {
       conn: null,
+      lastSync: null,
+      syncInProgress: false,
 
       showConnectedToSalesforce: false,
     };
@@ -68,6 +81,25 @@ export default {
       console.log('Connected to Salesforce');
       this.conn = conn;
     });
+  },
+
+  methods: {
+    ...mapMutations(['replaceMemberList']),
+    sync() {
+      this.syncInProgress = true;
+      this.conn.query(
+        'Select Id, Name FROM Contact WHERE Is_Current_TA_Member__c = true',
+        (err, res) => {
+          this.syncInProgress = false;
+          if (err) {
+            console.log(err); // TODO: alert()
+            return;
+          }
+          this.lastSync = Date.now();
+          console.log(res);
+        },
+      );
+    },
   },
 };
 </script>
