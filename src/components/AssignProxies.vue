@@ -67,5 +67,3 @@ export default {
   },
 };
 </script>
-
-<style src="vue-d3-network/dist/vue-d3-network.css"></style>
