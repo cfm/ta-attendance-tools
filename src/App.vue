@@ -89,6 +89,7 @@ export default {
     jsforce.browser.on('connect', (conn) => {
       console.log('Connected to Salesforce');
       this.conn = conn;
+      this.sync();
     });
   },
 
@@ -107,7 +108,7 @@ export default {
             return;
           }
           this.lastSync = Date.now();
-          console.log(res);
+          this.replaceMemberList(res.records);
         },
       );
     },

@@ -7,7 +7,7 @@
     :headers="headers"
     hide-default-footer
     :items="members"
-    item-key="lastName"
+    item-key="Id"
     show-select
   >
   </v-data-table>
@@ -22,6 +22,7 @@ export default {
   data: () => {
     return {
       present: [],
+      EXCLUDE_HEADERS: ['Id', 'attributes'],
     };
   },
 
@@ -39,7 +40,9 @@ export default {
     },
     headers() {
       if (this._headers == undefined) return [];
-      return this._headers.filter((k) => k.text !== 'padding');
+      return this._headers.filter(
+        (k) => !this.EXCLUDE_HEADERS.includes(k.text),
+      );
     },
   },
 
