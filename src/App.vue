@@ -1,6 +1,10 @@
 <template>
   <v-app>
     <v-main>
+      <Login v-if="loginRequired" />
+      <v-snackbar v-model="showConnectedToSalesforce" color="success">
+        Connected to Salesforce
+      </v-snackbar>
       <v-app-bar>
         <v-chip :ripple="false">
           <v-avatar>{{ members.length }}</v-avatar> members
@@ -15,15 +19,26 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import jsforce from 'jsforce';
+import { mapState } from 'vuex';
 
-import Wizard from "./components/Wizard";
+import Login from './components/Login';
+import Wizard from './components/Wizard';
 
 export default {
-  name: "App",
+  name: 'App',
 
   components: {
+    Login,
     Wizard,
+  },
+
+  data() {
+    return {
+      conn: null,
+
+      showConnectedToSalesforce: false,
+    };
   },
 
   computed: {
@@ -31,6 +46,28 @@ export default {
       members: (state) => state.memberList,
       present: (state) => state.presentList,
     }),
+
+    loginRequired: function () {
+      return this.conn == null;
+    },
+  },
+
+  watch: {
+    conn: function (conn) {
+      if (conn) this.showConnectedToSalesforce = true;
+    },
+  },
+
+  async mounted() {
+    jsforce.browser.init({
+      clientId: process.env.VUE_APP_SALESFORCE_CLIENT_ID,
+      clientSecret: process.env.VUE_APP_SALESFORCE_CLIENT_SECRET,
+      redirectUri: process.env.VUE_APP_SALESFORCE_REDIRECT_URI,
+    });
+    jsforce.browser.on('connect', (conn) => {
+      console.log('Connected to Salesforce');
+      this.conn = conn;
+    });
   },
 };
 </script>

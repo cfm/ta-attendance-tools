@@ -1,2 +1,6 @@
 [build]
 functions = "functions"
+
+[dev.https]
+certFile = "localhost+1.pem"
+keyFile = "localhost+1-key.pem"
