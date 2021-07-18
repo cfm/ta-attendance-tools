@@ -14,10 +14,10 @@
 </template>
 
 <script>
-import { mapMutations, mapState } from "vuex";
+import { mapMutations, mapState } from 'vuex';
 
 export default {
-  name: "TakeAttendance",
+  name: 'TakeAttendance',
 
   data: () => {
     return {
@@ -39,12 +39,12 @@ export default {
     },
     headers() {
       if (this._headers == undefined) return [];
-      return this._headers.filter((k) => k.text !== "padding");
+      return this._headers.filter((k) => k.text !== 'padding');
     },
   },
 
   methods: {
-    ...mapMutations(["replacePresentList"]),
+    ...mapMutations(['replacePresentList']),
   },
 
   watch: {

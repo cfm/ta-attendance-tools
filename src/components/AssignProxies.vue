@@ -16,13 +16,13 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState } from 'vuex';
 
 export default {
-  name: "AssignProxies",
+  name: 'AssignProxies',
 
   data: () => ({
-    transcript: "",
+    transcript: '',
     proxies: null,
   }),
 
@@ -36,27 +36,27 @@ export default {
       if (!this.proxies) return assignments;
 
       Object.entries(this.proxies).forEach(([represented, holder]) => {
-          represented = represented.trim();
-          holder = holder.trim();
+        represented = represented.trim();
+        holder = holder.trim();
 
-          if (assignments[holder]) {
-            assignments[holder].push(represented);
-          } else {
-            assignments[holder] = [represented];
-          }
+        if (assignments[holder]) {
+          assignments[holder].push(represented);
+        } else {
+          assignments[holder] = [represented];
+        }
       });
 
       return assignments;
-    }
+    },
   },
 
   methods: {
     async doAssignProxies() {
       let res = await fetch(process.env.VUE_APP_PROXY_SOLVER_API, {
-        method: "POST",
-          headers: {
-            'Content-Type': 'application/json',
-            },
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           memberList: this.memberList,
           presentList: this.presentList,
@@ -68,4 +68,4 @@ export default {
 };
 </script>
 
-  <style src="vue-d3-network/dist/vue-d3-network.css"></style>
+<style src="vue-d3-network/dist/vue-d3-network.css"></style>

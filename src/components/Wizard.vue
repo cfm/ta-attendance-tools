@@ -24,14 +24,14 @@
 </template>
 
 <script>
-import { mapState } from "vuex";
+import { mapState } from 'vuex';
 
-import AssignProxies from "./AssignProxies";
-import ImportMemberList from "./ImportMemberList";
-import TakeAttendance from "./TakeAttendance";
+import ImportMemberList from './ImportMemberList';
+import AssignProxies from './AssignProxies';
+import TakeAttendance from './TakeAttendance';
 
 export default {
-  name: "Wizard",
+  name: 'Wizard',
 
   components: {
     AssignProxies,
