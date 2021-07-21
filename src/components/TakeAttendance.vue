@@ -52,7 +52,7 @@ export default {
 
   watch: {
     present(val) {
-      this.replacePresentList(val.map((member) => member.lastName));
+      this.replacePresentList(val.map((member) => member.Id));
     },
   },
 };
