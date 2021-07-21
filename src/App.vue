@@ -84,6 +84,7 @@ export default {
     jsforce.browser.init({
       clientId: process.env.VUE_APP_SALESFORCE_CLIENT_ID,
       clientSecret: process.env.VUE_APP_SALESFORCE_CLIENT_SECRET,
+      loginUrl: process.env.VUE_APP_SALESFORCE_LOGIN_URL,
       redirectUri: process.env.VUE_APP_SALESFORCE_REDIRECT_URI,
     });
     jsforce.browser.on('connect', (conn) => {
