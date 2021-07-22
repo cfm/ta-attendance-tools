@@ -2,12 +2,12 @@
   <v-app>
     <v-main>
       <Login v-if="loginRequired" />
-      <Loading v-if="syncInProgress" />
+      <Loading v-if="operationIsInProgress" />
       <v-snackbar v-model="showConnectedToSalesforce" color="success">
         Connected to Salesforce
       </v-snackbar>
-      <v-snackbar v-model="showSyncError" color="error">
-        {{ lastSyncError }}
+      <v-snackbar v-model="showError" color="error">
+        {{ lastError }}
       </v-snackbar>
       <v-app-bar>
         <v-chip @click="sync()">
@@ -51,12 +51,11 @@ export default {
   data() {
     return {
       conn: null,
+      lastError: null,
       lastSync: null,
-      lastSyncError: false,
-      syncInProgress: false,
 
       showConnectedToSalesforce: false,
-      showSyncError: false,
+      showError: false,
     };
   },
 
@@ -64,6 +63,9 @@ export default {
     ...mapState({
       members: (state) => state.memberList,
       present: (state) => state.presentList,
+
+      operationIsInProgress: (state) => state.operationIsInProgress,
+      operationHadError: (state) => state.operationHadError,
     }),
 
     loginRequired: function () {
@@ -75,8 +77,11 @@ export default {
     conn: function (conn) {
       if (conn) this.showConnectedToSalesforce = true;
     },
-    lastSyncError: function () {
-      this.showSyncError = true;
+    operationHadError(error) {
+      this.lastError = error;
+    },
+    lastError(error) {
+      this.showError = error != null;
     },
   },
 
@@ -95,17 +100,22 @@ export default {
   },
 
   methods: {
-    ...mapMutations(['replaceMemberList']),
+    ...mapMutations([
+      'replaceMemberList',
+      'startOperation',
+      'saveOperationError',
+      'finishOperation',
+    ]),
     sync() {
-      this.syncInProgress = true;
+      this.startOperation();
       this.conn.query(
         `SELECT ${FIELDS.join(
           ', ',
         )} FROM Contact WHERE Is_Current_TA_Member__c = true`,
         (err, res) => {
-          this.syncInProgress = false;
+          this.finishOperation();
           if (err) {
-            this.lastSyncError = err;
+            this.saveOperationError(err);
             return;
           }
           this.lastSync = Date.now();

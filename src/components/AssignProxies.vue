@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapMutations, mapState } from 'vuex';
 
 export default {
   name: 'AssignProxies',
@@ -51,18 +51,30 @@ export default {
   },
 
   methods: {
+    ...mapMutations([
+      'startOperation',
+      'saveOperationError',
+      'finishOperation',
+    ]),
     async doAssignProxies() {
-      let res = await fetch(process.env.VUE_APP_PROXY_SOLVER_API, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          memberList: this.memberList,
-          presentList: this.presentList,
-        }),
-      });
-      this.proxies = await res.json();
+      try {
+        this.startOperation();
+        let res = await fetch(process.env.VUE_APP_PROXY_SOLVER_API, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            memberList: this.memberList,
+            presentList: this.presentList,
+          }),
+        });
+        this.proxies = await res.json();
+      } catch (err) {
+        this.saveOperationError(err);
+      } finally {
+        this.finishOperation();
+      }
     },
   },
 };

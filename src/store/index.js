@@ -1,14 +1,16 @@
-import Vue from 'vue'
-import Vuex from 'vuex'
+import Vue from 'vue';
+import Vuex from 'vuex';
 
 import vuexLocal from '@/plugins/vuex-persist';
 
-Vue.use(Vuex)
+Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
     memberList: [],
     presentList: [],
+    operationIsInProgress: false,
+    operationHadError: undefined,
   },
   mutations: {
     replaceMemberList(state, memberList) {
@@ -17,11 +19,17 @@ export default new Vuex.Store({
     replacePresentList(state, presentList) {
       state.presentList = presentList;
     },
+    startOperation(state) {
+      state.operationIsInProgress = true;
+    },
+    saveOperationError(state, error) {
+      state.operationHadError = error;
+    },
+    finishOperation(state) {
+      state.operationIsInProgress = false;
+    },
   },
-  modules: {
-  },
+  modules: {},
 
-  plugins: [
-    vuexLocal.plugin,
-  ]
-})
+  plugins: [vuexLocal.plugin],
+});
