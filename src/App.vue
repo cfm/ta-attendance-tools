@@ -6,8 +6,8 @@
       <v-snackbar v-model="showConnectedToSalesforce" color="success">
         Connected to Salesforce
       </v-snackbar>
-      <v-snackbar v-model="showSyncError" color="error">
-        {{ lastSyncError }}
+      <v-snackbar v-model="showError" color="error">
+        {{ lastError }}
       </v-snackbar>
       <v-app-bar>
         <v-chip @click="sync()">
@@ -51,11 +51,11 @@ export default {
   data() {
     return {
       conn: null,
+      lastError: null,
       lastSync: null,
-      lastSyncError: false,
 
       showConnectedToSalesforce: false,
-      showSyncError: false,
+      showError: false,
     };
   },
 
@@ -65,6 +65,7 @@ export default {
       present: (state) => state.presentList,
 
       operationIsInProgress: (state) => state.operationIsInProgress,
+      operationHadError: (state) => state.operationHadError,
     }),
 
     loginRequired: function () {
@@ -76,8 +77,11 @@ export default {
     conn: function (conn) {
       if (conn) this.showConnectedToSalesforce = true;
     },
-    lastSyncError: function () {
-      this.showSyncError = true;
+    operationHadError(error) {
+      this.lastError = error;
+    },
+    lastError(error) {
+      this.showError = error != null;
     },
   },
 
@@ -96,7 +100,12 @@ export default {
   },
 
   methods: {
-    ...mapMutations(['replaceMemberList', 'startOperation', 'finishOperation']),
+    ...mapMutations([
+      'replaceMemberList',
+      'startOperation',
+      'saveOperationError',
+      'finishOperation',
+    ]),
     sync() {
       this.startOperation();
       this.conn.query(
@@ -106,7 +115,7 @@ export default {
         (err, res) => {
           this.finishOperation();
           if (err) {
-            this.lastSyncError = err;
+            this.saveOperationError(err);
             return;
           }
           this.lastSync = Date.now();

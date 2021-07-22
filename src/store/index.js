@@ -10,6 +10,7 @@ export default new Vuex.Store({
     memberList: [],
     presentList: [],
     operationIsInProgress: false,
+    operationHadError: undefined,
   },
   mutations: {
     replaceMemberList(state, memberList) {
@@ -21,6 +22,8 @@ export default new Vuex.Store({
     startOperation(state) {
       state.operationIsInProgress = true;
     },
+    saveOperationError(state, error) {
+      state.operationHadError = error;
     },
     finishOperation(state) {
       state.operationIsInProgress = false;
