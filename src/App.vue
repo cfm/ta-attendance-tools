@@ -2,7 +2,7 @@
   <v-app>
     <v-main>
       <Login v-if="loginRequired" />
-      <Loading v-if="syncInProgress" />
+      <Loading v-if="operationIsInProgress" />
       <v-snackbar v-model="showConnectedToSalesforce" color="success">
         Connected to Salesforce
       </v-snackbar>
@@ -53,7 +53,6 @@ export default {
       conn: null,
       lastSync: null,
       lastSyncError: false,
-      syncInProgress: false,
 
       showConnectedToSalesforce: false,
       showSyncError: false,
@@ -64,6 +63,8 @@ export default {
     ...mapState({
       members: (state) => state.memberList,
       present: (state) => state.presentList,
+
+      operationIsInProgress: (state) => state.operationIsInProgress,
     }),
 
     loginRequired: function () {
@@ -95,15 +96,15 @@ export default {
   },
 
   methods: {
-    ...mapMutations(['replaceMemberList']),
+    ...mapMutations(['replaceMemberList', 'startOperation', 'finishOperation']),
     sync() {
-      this.syncInProgress = true;
+      this.startOperation();
       this.conn.query(
         `SELECT ${FIELDS.join(
           ', ',
         )} FROM Contact WHERE Is_Current_TA_Member__c = true`,
         (err, res) => {
-          this.syncInProgress = false;
+          this.finishOperation();
           if (err) {
             this.lastSyncError = err;
             return;
