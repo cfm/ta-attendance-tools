@@ -5,7 +5,7 @@
         Take attendance
       </v-stepper-step>
       <v-stepper-step step="2" :editable="haveAttendance">
-        Assign proxies
+        <v-badge dot :color="solverApiStatusColor"> Assign proxies </v-badge>
       </v-stepper-step>
     </v-stepper-header>
     <v-stepper-items>
@@ -20,7 +20,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapMutations, mapState } from 'vuex';
 
 import AssignProxies from './AssignProxies';
 import TakeAttendance from './TakeAttendance';
@@ -31,6 +31,12 @@ export default {
   components: {
     AssignProxies,
     TakeAttendance,
+  },
+
+  data() {
+    return {
+      solverApiIsAvailable: false,
+    };
   },
 
   computed: {
@@ -44,6 +50,34 @@ export default {
     },
     haveMemberList() {
       return this.members.length > 0;
+    },
+
+    solverApiStatusColor() {
+      return this.solverApiIsAvailable ? 'green' : 'orange';
+    },
+  },
+
+  async mounted() {
+    await this.checkSolverApi();
+  },
+
+  methods: {
+    ...mapMutations(['saveOperationError']),
+    async checkSolverApi() {
+      try {
+        let res = await fetch(process.env.VUE_PROXY_SOLVER_API);
+        this.solverApiIsAvailable = res.status == 200;
+      } catch (err) {
+        this.saveOperationError(err);
+      }
+    },
+  },
+
+  timers: {
+    checkSolverApi: {
+      time: 60 * 1000,
+      autostart: true,
+      repeat: true,
     },
   },
 };
